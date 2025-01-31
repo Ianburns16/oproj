@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Nav() {
   return (
-    <div>
+    <div className="topbar">
     <div className="contact-links">
       <span>📞628-6349 </span>
       <span>✉️ info@cakebakery.com</span>
@@ -10,15 +10,16 @@ export default function Nav() {
       <span><a href="#">Instagram</a> </span>
     </div>
 
-    
-      <Image
-        src="/favicon_io/favicon-16x16.png"
-        alt="LoveCreamCravings Logo"
-        className="logo"
-        width={16}
-        height={16}
-      />
-      <h1>LoveCreamCravings</h1>
+    <div className="logo-container">
+        <Image
+          src="https://c8.alamy.com/comp/2R49607/cakes-shop-vector-template-logo-2R49607.jpg"
+          alt="LoveCreamCravings Logo"
+          className="logo"
+          width={50} /* Adjusted size for better alignment */
+          height={50}
+        />
+        <h1>LoveCreamCravings</h1>
+      </div>
 
       <nav id="topbar">
         <ul>

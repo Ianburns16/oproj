@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { supabase } from "../utils/supabase/supabaseClient";
+import "../app/homepade.css";
 
 const Body = () => {
   const [categories, setCategories] = useState([]);
@@ -27,12 +28,13 @@ const Body = () => {
 
   return (
     <div>
-      <div
+      <div className="mainback"
         style={{
-          backgroundImage: "url('https://chanchich.com/wp-content/uploads/2023/05/belize-maya-sites-1200x700.jpg')", // Replace with your image path
+          backgroundImage: "url('https://images.immediate.co.uk/production/volatile/sites/30/2013/05/easy-lemon-layer-cake-hero-e54adca.jpg?resize=1200%2C630')", // Replace with your image path
           backgroundSize: "cover",
           backgroundPosition: "center",
-          height: "60vh", // Make the background image fill the entire viewport
+          height: "60vh",
+          
         }}
       >
         <h1>Welcome to the Bakery</h1>
