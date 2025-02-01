@@ -104,6 +104,11 @@ export default function CategoryPage() {
             />
            <p>{`$${selectedItem.price}`}</p>
            <p>{selectedItem.description}</p>
+           <p>Select the amount</p>
+             <input type="number" placeholder="Enter amount" />
+           <p>Enter request</p>
+             <input type="text" placeholder="Enter request details" />
+
             <button className="buy-button">Add to Cart</button>
           </div>
         </div>
