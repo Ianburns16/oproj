@@ -4,10 +4,16 @@ import Image from "next/image";
 import { supabase } from "../utils/supabase/supabaseClient";
 import "../app/homepade.css";
 
+interface Category {
+  id: number;
+  title: string;
+  image: string;
+}
+
 const Body = () => {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -16,10 +22,16 @@ const Body = () => {
         if (error) {
           throw error;
         }
-        setCategories(data);
+        setCategories(data as Category[]); // Cast data to Category[]
       } catch (error) {
-        console.error("Error fetching categories:", error.message);
-        setError("Failed to load categories. Please try again later.");
+        // Type guard to check if error is an instance of Error
+        if (error instanceof Error) {
+          console.error("Error fetching categories:", error.message);
+          setError("Failed to load categories. Please try again later.");
+        } else {
+          console.error("An unknown error occurred:", error);
+          setError("An unknown error occurred. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
@@ -29,12 +41,14 @@ const Body = () => {
   }, []);
 
   if (loading) {
-    return <div className="loading">Loading...</div>;
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return <div>{error}</div>;
   }
+
+
 
   return (
     <div>
