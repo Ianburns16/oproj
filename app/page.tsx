@@ -1,7 +1,7 @@
 import Image from "next/image";
-
+import "../app/homepade.css";
 export default function Nav() {
-  return (
+  return (<div>
     <div className="topbar">
     <div className="contact-links">
       <span>📞628-6349 </span>
@@ -30,7 +30,20 @@ export default function Nav() {
           <li><a href="./about.html">About</a></li>
         </ul>
       </nav>
-    
+     
+  </div>
+  <div className="mainback"
+        style={{
+          backgroundImage: "url('https://images.immediate.co.uk/production/volatile/sites/30/2013/05/easy-lemon-layer-cake-hero-e54adca.jpg?resize=1200%2C630')", // Replace with your image path
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          height: "60vh",
+          
+        }}
+      >
+        <h1>Welcome to the Bakery</h1>
+        <p>Freshly baked goods, just for you.</p>
+      </div>
   </div>
   );
 }
