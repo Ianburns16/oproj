@@ -1,9 +1,11 @@
+// pages/CategoryPage.tsx
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "../../utils/supabase/supabaseClient";
 import "../homepade.css";
+import { useCart } from "../models/cartmodel";
 
 interface Item {
   id: number;
@@ -21,6 +23,10 @@ export default function CategoryPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [amount, setAmount] = useState(1);
+  const [request, setRequest] = useState("");
+
+  const { addToCart } = useCart();
 
   useEffect(() => {
     if (!categoryId) {
@@ -35,16 +41,10 @@ export default function CategoryPage() {
           .from("items")
           .select("*")
           .eq("categoryid", categoryId);
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
         setItems(data as Item[]);
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred.");
-        }
+        setError(err instanceof Error ? err.message : "An unknown error occurred.");
       } finally {
         setLoading(false);
       }
@@ -53,21 +53,31 @@ export default function CategoryPage() {
     fetchItems();
   }, [categoryId]);
 
-  if (loading) {
-    return <div>Loading items...</div>;
-  }
+  const openModal = (item: Item) => setSelectedItem(item);
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-  const openModal = (item: Item) => {
-    setSelectedItem(item);
-  };
-
-  // Function to close the modal
   const closeModal = () => {
     setSelectedItem(null);
+    setAmount(1);
+    setRequest("");
   };
+
+  const handleAddToCart = () => {
+    if (selectedItem) {
+      addToCart({
+        id: selectedItem.id,
+        name: selectedItem.name,
+        image: selectedItem.image,  // include the image URL
+        price: selectedItem.price,
+        requ: request,
+        quta: amount,
+      });
+      closeModal();
+    }
+  };
+  
+
+  if (loading) return <div>Loading items...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div>
@@ -88,28 +98,42 @@ export default function CategoryPage() {
         ))}
       </div>
 
-  
       {selectedItem && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close-button" onClick={closeModal}>&times;</span>
+            <span className="close-button" onClick={closeModal}>
+              &times;
+            </span>
             <h2>{selectedItem.name}</h2>
             <Image
               src={selectedItem.image}
               alt={selectedItem.name}
-              className="modal-img"
               width={300}
               height={300}
               priority
             />
-           <p>{`$${selectedItem.price}`}</p>
-           <p>{selectedItem.description}</p>
-           <p>Select the amount</p>
-             <input type="number" placeholder="Enter amount" />
-           <p>Enter request</p>
-             <input type="text" placeholder="Enter request details" />
+            <p>{`$${selectedItem.price}`}</p>
+            <p>{selectedItem.description}</p>
+            
+            <label>Select the amount</label>
+            <input
+              type="number"
+              value={amount}
+              min="1"
+              onChange={(e) => setAmount(Number(e.target.value))}
+            />
 
-            <button className="buy-button">Add to Cart</button>
+            <label>Enter request</label>
+            <input
+              type="text"
+              value={request}
+              onChange={(e) => setRequest(e.target.value)}
+              placeholder="Enter request details"
+            />
+
+            <button className="buy-button" onClick={handleAddToCart}>
+              Add to Cart
+            </button>
           </div>
         </div>
       )}

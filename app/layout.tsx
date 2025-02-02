@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "./nav";
+import { CartProvider } from "./models/cartmodel"; // Adjust the path if necessary
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,8 +27,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Nav />
-        {children}
+      
+        <CartProvider>
+          <Nav />
+          {children}
+        </CartProvider>
       </body>
     </html>
   );
