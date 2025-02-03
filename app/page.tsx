@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation"; // Import Next.js navigation hook
 import { supabase } from "../utils/supabase/supabaseClient";
 import "../app/homepade.css";
-
 interface Category {
   id: number;
   title: string;
@@ -48,7 +47,7 @@ const Body = () => {
         className="mainback"
         style={{
           backgroundImage:
-            "url('https://images.immediate.co.uk/production/volatile/sites/30/2013/05/easy-lemon-layer-cake-hero-e54adca.jpg?resize=1200%2C630')",
+            "url('https://media-hosting.imagekit.io//5ba7decbb8f446c8/Breakfast.jpeg?Expires=1833201562&Key-Pair-Id=K2ZIVPTIP2VGHC&Signature=XDF2q5Cy9ZV2OEQMvP3pimlCQJ9NXSWlnZGdQ5rvuUKfvrjgXJu2YqmzA5Z0iyXbQfUw-sdpDFLxHhPlUOg1GTaPnmbgXqo9GhaxPi6776psvsuxSzqMk0K95gC2rgmHO-apWpCJ98olaud7MX9OaWc5HrLGaKFCfsAe2kCBzi~J0H~vhAIlSkASOyw1LL~n0l7uS0n4iIBE52wEm9X0rDOhIDBiiC9SPRFMRAVAV0Bsw6SACaIIegHH6TyC0dd2cgkkGkKQ5HkQLO2ZibhZUQKoR-LKc6yiywzgSdbTtv8D48CVZIJRAPHmkkUv9ckNS1xcExsc8km8Jvzk~g9X-w__')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           height: "60vh",
