@@ -1,20 +1,20 @@
-// context/CartContext.tsx
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
 
 export interface CartItem {
-    id: number;       
-    name: string;    
-    image: string;  
-    price: number;
-    requ: string;   
-    quta: number;     
-  }
-  
+  id: number;
+  name: string;
+  image: string;
+  price: number;
+  requ: string;
+  quta: number;
+}
+
 interface CartContextProps {
   cart: CartItem[];
   addToCart: (newItem: CartItem) => void;
   removeFromCart: (index: number) => void;
+  clearCart: () => void; // New function
 }
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
@@ -30,8 +30,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const clearCart = () => {
+    setCart([]); // Clears the cart
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useCart } from "../models/cartmodel";
 import { useRouter } from "next/navigation";
+import { supabase } from "../../utils/supabase/supabaseClient";
 
 interface UserInfo {
   name: string;
@@ -12,7 +13,7 @@ interface UserInfo {
 }
 
 export default function CheckoutPage() {
-  const { cart, removeFromCart} = useCart();
+  const { cart, removeFromCart, clearCart } = useCart();
   const router = useRouter();
   const [showCheckoutForm, setShowCheckoutForm] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo>({
@@ -21,14 +22,56 @@ export default function CheckoutPage() {
     address: '',
     specialInstructions: ''
   });
+  const [loading, setLoading] = useState(false);
 
   const getTotal = () => 
     cart.reduce((sum, item) => sum + item.price * item.quta, 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Order submitted:", { userInfo, cart });
-    router.push("/confirmation");
+    setLoading(true);
+    
+    try {
+      // Insert user data
+      const { data: userData, error: userError } = await supabase
+        .from('user')
+        .insert([{
+          name: userInfo.name,
+          phonenumber: userInfo.phonenumber,
+          location: userInfo.address,
+          special: userInfo.specialInstructions
+        }])
+        .select();
+
+      if (userError) throw userError;
+      
+      // Get inserted user ID
+      const userId = userData[0].id;
+      
+      const helper = cart.map(item => ({
+        user_id: userId,
+        item: item.id,
+        request: item.requ,
+        quat: item.quta
+      }));
+      
+      // Insert helper data
+      const { error: helperError } = await supabase
+        .from('helper')
+        .insert(helper);
+
+      if (helperError) throw helperError;
+
+      // Clear cart and redirect
+      clearCart();
+      router.push("/confirmation");
+    } catch (error) {
+      
+      console.error("Order submission error:", error);
+      alert("Failed to submit order. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -92,7 +135,7 @@ export default function CheckoutPage() {
                 <div>
                   <label className="block text-sm font-medium mb-1">Phone Number</label>
                   <input
-                    type="phonenumber"
+                    type="tel"
                     required
                     className="w-full p-2 border rounded"
                     value={userInfo.phonenumber}
@@ -111,8 +154,6 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-
-
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Special Instructions</label>
                   <textarea
@@ -128,14 +169,16 @@ export default function CheckoutPage() {
                   type="button"
                   className="px-4 py-2 text-gray-600 hover:text-gray-800"
                   onClick={() => setShowCheckoutForm(false)}
+                  disabled={loading}
                 >
                   Back to Cart
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+                  className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 disabled:bg-gray-400"
+                  disabled={loading}
                 >
-                  Place Order
+                  {loading ? 'Processing...' : 'Place Order'}
                 </button>
               </div>
             </form>
