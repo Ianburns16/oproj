@@ -299,3 +299,79 @@ h1 {
     height: auto;
   }
 }
+/* Cart Overlay: covers the entire viewport with a semi-transparent background */
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* semi-transparent black */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* ensure it sits on top */
+}
+
+/* Cart Content: the modal container for your cart details */
+.cart-content {
+  background: #fff;
+  padding: 20px;
+  width: 400px;              /* adjust width as needed */
+  max-height: 80vh;          /* maximum height, scrolls if content is too tall */
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Close Button: positioned in the top-right corner */
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Cart Items Container: spacing between items */
+.cart-items {
+  margin-top: 15px;
+}
+
+/* Each individual Cart Item */
+.cart-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Image styling for each cart item */
+.cart-item-image {
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+/* Cart Details: text details for each item */
+.cart-details {
+  flex-grow: 1;
+}
+
+/* Remove Button: styling for removing items from the cart */
+.remove-button {
+  background: #ff4d4d;
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.remove-button:hover {
+  background: #cc0000;
+}

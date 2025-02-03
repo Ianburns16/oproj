@@ -3,14 +3,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import "../app/homepade.css";
-import { useCart } from "./models/cartmodel"; // Adjust path if needed
+import { useCart } from "./models/cartmodel";
+import { useRouter } from 'next/navigation'; // Changed from 'next/router'
 
 export default function Nav() {
+  const router = useRouter();
   const { cart, removeFromCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const openCart = () => setIsCartOpen(true);
-  const closeCart = () => setIsCartOpen(false);
+  // Rest of your component remains the same...
+  const openCart = () => {
+    setIsCartOpen(true);
+  };
+  const closeCart = () => {
+    setIsCartOpen(false);
+  };
 
   return (
     <div className="topbar">
@@ -47,44 +54,61 @@ export default function Nav() {
         View Cart ({cart.length})
       </button>
 
-      {/* Cart Modal */}
       {isCartOpen && (
-        <div className="cart-overlay" onClick={closeCart}>
-          <div className="cart-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close-button" onClick={closeCart}>&times;</span>
-            <h2>Your Cart</h2>
-            {cart.length === 0 ? (
-              <p>Your cart is empty.</p>
-            ) : (
-              <div className="cart-items">
-                {cart.map((cartItem, index) => (
-                  <div key={index} className="cart-item">
-                    <Image
-                      src={cartItem.image}
-                      alt={cartItem.name}
-                      width={100}
-                      height={100}
-                      className="cart-item-image"
-                    />
-                    <div className="cart-details">
-                      <h3>{cartItem.name}</h3>
-                      <p>Quantity: {cartItem.quta}</p>
-                      <p>Request: {cartItem.requ || "None"}</p>
-                      <p>
-                        Price: ${cartItem.price} x {cartItem.quta} = $
-                        {cartItem.price * cartItem.quta}
-                      </p>
-                    </div>
-                    <button className="remove-button" onClick={() => removeFromCart(index)}>
-                      Remove
-                    </button>
-                  </div>
-                ))}
+  <div className="cart-overlay" onClick={closeCart} onTouchStart={closeCart}>
+    <div className="cart-content" onClick={(e) => e.stopPropagation()}>
+      <span className="close-button" onClick={closeCart}>&times;</span>
+      <h2>Your Cart</h2>
+      {cart.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <>
+          <div className="cart-items">
+            {cart.map((cartItem, index) => (
+              <div key={index} className="cart-item">
+                <Image
+                  src={cartItem.image}
+                  alt={cartItem.name}
+                  width={100}
+                  height={100}
+                  className="cart-item-image"
+                />
+                <div className="cart-details">
+                  <h3>{cartItem.name}</h3>
+                  <p>Quantity: {cartItem.quta}</p>
+                  <p>Request: {cartItem.requ || "None"}</p>
+                  <p>
+                    Price: ${cartItem.price} x {cartItem.quta} = $
+                    {(cartItem.price * cartItem.quta).toFixed(2)}
+                  </p>
+                </div>
+                <button className="remove-button" onClick={() => removeFromCart(index)}>
+                  Remove
+                </button>
               </div>
-            )}
+            ))}
           </div>
-        </div>
+          
+          <div className="cart-summary">
+            <div className="total-price">
+              Total: ${cart.reduce((sum, item) => sum + (item.price * item.quta), 0).toFixed(2)}
+            </div>
+            <button 
+              className="checkout-button"
+              onClick={() => {
+                closeCart();
+                // Add your checkout logic here
+                router.push('/checkout'); // Make sure to import useRouter from 'next/router'
+              }}
+            >
+              Go to Checkout
+            </button>
+          </div>
+        </>
       )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
