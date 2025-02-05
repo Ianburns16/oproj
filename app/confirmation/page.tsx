@@ -1,6 +1,6 @@
 export default function confiirmation() {
 
     return(<div>
-        <p> thanks</p>
+        <p>Thank you for your order.</p>
     </div>);
 };

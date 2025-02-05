@@ -81,7 +81,7 @@ export default function CategoryPage() {
 
   return (
     <div>
-      <h1>All Items</h1>
+      <h1></h1>
       <div className="card-section2">
         {items.map((item) => (
           <div key={item.id} className="card2" onClick={() => openModal(item)}>
