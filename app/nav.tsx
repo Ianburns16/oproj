@@ -46,13 +46,13 @@ export default function Nav() {
           <li><Link href="/category?categoryId=2">Drinks</Link></li>
           <li><Link href="/search">Search</Link></li>
           <li><Link href="/about">About</Link></li>
+          <li><button className="cart-button" onClick={openCart}>
+        View Cart ({cart.length})
+      </button></li>
         </ul>
       </nav>
 
-      {/* Cart Button */}
-      <button className="cart-button" onClick={openCart}>
-        View Cart ({cart.length})
-      </button>
+      
 
       {isCartOpen && (
   <div className="cart-overlay" onClick={closeCart} onTouchStart={closeCart}>
