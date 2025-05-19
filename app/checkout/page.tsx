@@ -114,7 +114,7 @@ export default function CheckoutPage() {
           {cart.map((item, index) => (
             <div key={index} className="flex items-center gap-4 border-b pb-4">
               <Image
-                src={item.image}
+                src={item.image.trim()}
                 alt={item.name}
                 width={100}
                 height={100}

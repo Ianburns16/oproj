@@ -86,7 +86,7 @@ export default function CategoryPage() {
         {items.map((item) => (
           <div key={item.id} className="card2" onClick={() => openModal(item)}>
             <Image
-              src={item.image}
+              src={item.image.trim()}
               alt={item.name}
               className="card-img"
               width={200}
@@ -106,7 +106,7 @@ export default function CategoryPage() {
             </span>
             <h2>{selectedItem.name}</h2>
             <Image
-              src={selectedItem.image}
+              src={selectedItem.image.trim()}
               alt={selectedItem.name}
               width={300}
               height={300}

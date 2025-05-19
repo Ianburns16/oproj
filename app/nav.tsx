@@ -67,12 +67,13 @@ export default function Nav() {
             {cart.map((cartItem, index) => (
               <div key={index} className="cart-item">
                 <Image
-                  src={cartItem.image}
-                  alt={cartItem.name}
-                  width={100}
-                  height={100}
-                  className="cart-item-image"
-                />
+  src={cartItem.image.trim()}
+  alt={cartItem.name}
+  width={100}
+  height={100}
+  className="cart-item-image"
+/>
+
                 <div className="cart-details">
                   <h3>{cartItem.name}</h3>
                   <p>Quantity: {cartItem.quta}</p>
