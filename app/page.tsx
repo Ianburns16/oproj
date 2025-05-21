@@ -5,28 +5,15 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../utils/supabase/supabaseClient";
 import "../app/homepade.css";
 import { useCart } from "./models/cartmodel";
-
-interface Category {
-  id: number;
-  title: string;
-  image: string;
-}
-
-interface Item {
-  id: number;
-  name: string;
-  image: string;
-  categoryid: number;
-  price: number;
-  description: string;
-}
+import { ItemModel } from "./models/ItemModel";
+import { CategoryModel } from "./models/CategoryModel";
 
 const Body = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [featuredItems, setFeaturedItems] = useState<Item[]>([]);
+  const [categories, setCategories] = useState<CategoryModel[]>([]);
+  const [featuredItems, setFeaturedItems] = useState<ItemModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ItemModel | null>(null);
   const [amount, setAmount] = useState(1);
   const [request, setRequest] = useState("");
   const [email, setEmail] = useState("");
@@ -40,7 +27,7 @@ const Body = () => {
         // Fetch categories
         const { data: categoriesData, error: categoriesError } = await supabase.from("categories").select("*");
         if (categoriesError) throw categoriesError;
-        setCategories(categoriesData as Category[]);
+        setCategories(categoriesData.map(category => CategoryModel.fromSupabase(category)));
 
         // Fetch featured items (first 3 items from items table)
         const { data: itemsData, error: itemsError } = await supabase
@@ -48,7 +35,7 @@ const Body = () => {
           .select("*")
           .limit(3);
         if (itemsError) throw itemsError;
-        setFeaturedItems(itemsData as Item[]);
+        setFeaturedItems(itemsData.map(item => ItemModel.fromSupabase(item)));
       } catch (error) {
         setError(error instanceof Error ? error.message : "An unknown error occurred");
       } finally {
@@ -58,7 +45,7 @@ const Body = () => {
     fetchData();
   }, []);
 
-  const openModal = (item: Item) => setSelectedItem(item);
+  const openModal = (item: ItemModel) => setSelectedItem(item);
 
   const closeModal = () => {
     setSelectedItem(null);
@@ -137,14 +124,14 @@ const Body = () => {
                 <div className="image-container">
                   <Image
                     src={category.image.trim()}
-                    alt={category.title}
+                    alt={category.name}
                     width={300}
                     height={300}
                     className="category-image"
                     priority
                   />
                 </div>
-                <h3>{category.title}</h3>
+                <h3>{category.name}</h3>
               </div>
             ))}
           </div>
@@ -166,7 +153,7 @@ const Body = () => {
                 priority
               />
               <h3>{item.name}</h3>
-              <p>${item.price}</p>
+              <p>{item.getDisplayPrice()}</p>
               <button className="add-to-cart">Add to Cart</button>
             </div>
           ))}
@@ -187,7 +174,7 @@ const Body = () => {
               height={300}
               priority
             />
-            <p>{`$${selectedItem.price}`}</p>
+            <p>{selectedItem.getDisplayPrice()}</p>
             <p>{selectedItem.description}</p>
             
             <label>Select the amount</label>

@@ -1,41 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import { supabase } from "../../utils/supabase/supabaseClient";
 import "../homepade.css";
 import { useCart } from "../models/cartmodel";
+import { ItemModel } from "../models/ItemModel";
 
-interface Item {
-  id: number;
-  name: string;
-  image: string;
-  categoryid: number;
-  price: number;
-  description: string;
-}
-
-export default function SearchPage() {
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [items, setItems] = useState<Item[]>([]);
+const SearchPage = () => {
+  const [items, setItems] = useState<ItemModel[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ItemModel | null>(null);
   const [amount, setAmount] = useState(1);
   const [request, setRequest] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-
   const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const { data, error } = await supabase
-          .from("items")
-          .select("*");
+        const { data, error } = await supabase.from("items").select("*");
         if (error) throw error;
-        setItems(data as Item[]);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred.");
+        setItems(data.map(item => ItemModel.fromSupabase(item)));
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "An unknown error occurred");
       } finally {
         setLoading(false);
       }
@@ -44,7 +32,7 @@ export default function SearchPage() {
     fetchItems();
   }, []);
 
-  const openModal = (item: Item) => setSelectedItem(item);
+  const openModal = (item: ItemModel) => setSelectedItem(item);
 
   const closeModal = () => {
     setSelectedItem(null);
@@ -66,38 +54,40 @@ export default function SearchPage() {
     }
   };
 
-  const filteredItems = items.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredItems = items.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) return <div>Loading items...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="loading-spinner"></div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div className="search-container">
-      <div className="search-input-container">
+    <main className="search-page">
+      <div className="search-container">
         <input
-          className="search-input"
           type="text"
-          placeholder="Search for desserts..."
+          placeholder="Search desserts..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          className="search-input"
         />
       </div>
-      <div className="card-section2">
+
+      <div className="items-grid">
         {filteredItems.map((item) => (
-          <div key={item.id} className="card2" onClick={() => openModal(item)}>
+          <div key={item.id} className="item-card" onClick={() => openModal(item)}>
             <Image
               src={item.image.trim()}
               alt={item.name}
-              className="card-img"
-              width={200}
-              height={200}
+              width={250}
+              height={250}
               priority
             />
             <h3>{item.name}</h3>
-            <p>${item.price}</p>
+            <p>{item.getDisplayPrice()}</p>
+            <button className="add-to-cart">Add to Cart</button>
           </div>
         ))}
       </div>
@@ -116,7 +106,7 @@ export default function SearchPage() {
               height={300}
               priority
             />
-            <p>{`$${selectedItem.price}`}</p>
+            <p>{selectedItem.getDisplayPrice()}</p>
             <p>{selectedItem.description}</p>
             
             <label>Select the amount</label>
@@ -141,6 +131,8 @@ export default function SearchPage() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   );
-}
+};
+
+export default SearchPage;
