@@ -18,6 +18,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.pinimg.com',
       },
+      
       // Alamy
       {
         protocol: 'https',
@@ -27,6 +28,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'media-hosting.imagekit.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com'
       },
       // Add any other domains you use
     ],

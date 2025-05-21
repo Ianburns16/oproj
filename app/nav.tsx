@@ -42,7 +42,7 @@ export default function Nav() {
       <nav id="topbar">
         <ul>
           <li><Link href="/">Home</Link></li>
-          <li><Link href="/category?categoryId=1">Desserts</Link></li>
+          <li><Link href="/category?categoryId=1">Signature Cakes</Link></li>
           <li><Link href="/category?categoryId=2">Drinks</Link></li>
           <li><Link href="/search">Search</Link></li>
           <li><Link href="/about">About</Link></li>

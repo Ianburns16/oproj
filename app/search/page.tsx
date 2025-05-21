@@ -15,24 +15,23 @@ interface Item {
   description: string;
 }
 
-export default function CategoryPage() {
-  const searchParams = useSearchParams();
+export default function SearchPage() {
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [amount, setAmount] = useState(1);
   const [request, setRequest] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { addToCart } = useCart();
 
   useEffect(() => {
-    
     const fetchItems = async () => {
       try {
         const { data, error } = await supabase
           .from("items")
-          .select("*")
+          .select("*");
         if (error) throw error;
         setItems(data as Item[]);
       } catch (err) {
@@ -43,7 +42,7 @@ export default function CategoryPage() {
     };
 
     fetchItems();
-  },);
+  }, []);
 
   const openModal = (item: Item) => setSelectedItem(item);
 
@@ -58,7 +57,7 @@ export default function CategoryPage() {
       addToCart({
         id: selectedItem.id,
         name: selectedItem.name,
-        image: selectedItem.image,  // include the image URL
+        image: selectedItem.image,
         price: selectedItem.price,
         requ: request,
         quta: amount,
@@ -66,24 +65,28 @@ export default function CategoryPage() {
       closeModal();
     }
   };
-  
+
+  const filteredItems = items.filter(item =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (loading) return <div>Loading items...</div>;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
-        <div >
+    <div className="search-container">
+      <div className="search-input-container">
         <input
-                 className="w-full p-2 border rounded"
-                    type="tel"
-                    required                   
-                      
-                    
-                  />
-        </div>
+          className="search-input"
+          type="text"
+          placeholder="Search for desserts..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
       <div className="card-section2">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div key={item.id} className="card2" onClick={() => openModal(item)}>
             <Image
               src={item.image.trim()}
@@ -94,6 +97,7 @@ export default function CategoryPage() {
               priority
             />
             <h3>{item.name}</h3>
+            <p>${item.price}</p>
           </div>
         ))}
       </div>

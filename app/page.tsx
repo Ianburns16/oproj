@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { supabase } from "../utils/supabase/supabaseClient";
 import "../app/homepade.css";
+import { useCart } from "./models/cartmodel";
 
 interface Category {
   id: number;
@@ -11,26 +12,91 @@ interface Category {
   image: string;
 }
 
+interface Item {
+  id: number;
+  name: string;
+  image: string;
+  categoryid: number;
+  price: number;
+  description: string;
+}
+
 const Body = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [featuredItems, setFeaturedItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [amount, setAmount] = useState(1);
+  const [request, setRequest] = useState("");
+  const [email, setEmail] = useState("");
+  const [subscriptionStatus, setSubscriptionStatus] = useState<"idle" | "success" | "error">("idle");
   const router = useRouter();
+  const { addToCart } = useCart();
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase.from("categories").select("*");
-        if (error) throw error;
-        setCategories(data as Category[]);
+        // Fetch categories
+        const { data: categoriesData, error: categoriesError } = await supabase.from("categories").select("*");
+        if (categoriesError) throw categoriesError;
+        setCategories(categoriesData as Category[]);
+
+        // Fetch featured items (first 3 items from items table)
+        const { data: itemsData, error: itemsError } = await supabase
+          .from("items")
+          .select("*")
+          .limit(3);
+        if (itemsError) throw itemsError;
+        setFeaturedItems(itemsData as Item[]);
       } catch (error) {
         setError(error instanceof Error ? error.message : "An unknown error occurred");
       } finally {
         setLoading(false);
       }
     };
-    fetchCategories();
+    fetchData();
   }, []);
+
+  const openModal = (item: Item) => setSelectedItem(item);
+
+  const closeModal = () => {
+    setSelectedItem(null);
+    setAmount(1);
+    setRequest("");
+  };
+
+  const handleAddToCart = () => {
+    if (selectedItem) {
+      addToCart({
+        id: selectedItem.id,
+        name: selectedItem.name,
+        image: selectedItem.image,
+        price: selectedItem.price,
+        requ: request,
+        quta: amount,
+      });
+      closeModal();
+    }
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const { error } = await supabase
+        .from("sub")
+        .insert([{ email }]);
+      
+      if (error) throw error;
+      
+      setSubscriptionStatus("success");
+      setEmail("");
+      setTimeout(() => setSubscriptionStatus("idle"), 3000);
+    } catch (error) {
+      setSubscriptionStatus("error");
+      setTimeout(() => setSubscriptionStatus("idle"), 3000);
+    }
+  };
 
   return (
     <main className="home-container">
@@ -41,7 +107,7 @@ const Body = () => {
           <p className="hero-subtitle">Indulge in our heavenly desserts crafted with love</p>
           <button 
             className="cta-button"
-            onClick={() => router.push("/category")}
+            onClick={() => router.push("/search")}
           >
             Explore Menu
           </button>
@@ -89,49 +155,63 @@ const Body = () => {
       <section className="featured-section">
         <h2 className="section-title">Customer Favorites</h2>
         <div className="featured-grid">
-          {/* Chocolate Fudge Cake */}
-          <div className="featured-item">
-            <div className="featured-badge">Bestseller</div>
-            <Image
-              src="https://images.unsplash.com/photo-1578985545062-69928b1d9587"
-              alt="Chocolate Cake"
-              width={250}
-              height={250}
-            />
-            <h3>Chocolate Fudge Cake</h3>
-            <p>$24.99</p>
-            <button className="add-to-cart">Add to Cart</button>
-          </div>
-
-          {/* Luxury Chocolate Truffle Cake */}
-          <div className="featured-item">
-            <div className="featured-badge">Premium</div>
-            <Image
-              src="https://images.unsplash.com/photo-1571115177098-24ec42ed204d"
-              alt="Luxury Chocolate Truffle Cake"
-              width={250}
-              height={250}
-            />
-            <h3>Luxury Chocolate Truffle</h3>
-            <p>$32.99</p>
-            <button className="add-to-cart">Add to Cart</button>
-          </div>
-
-          {/* Raspberry Almond Tart */}
-          <div className="featured-item">
-            <div className="featured-badge">New</div>
-            <Image
-              src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e"
-              alt="Raspberry Almond Tart"
-              width={250}
-              height={250}
-            />
-            <h3>Raspberry Almond Tart</h3>
-            <p>$18.99</p>
-            <button className="add-to-cart">Add to Cart</button>
-          </div>
+          {featuredItems.map((item) => (
+            <div key={item.id} className="featured-item" onClick={() => openModal(item)}>
+              <div className="featured-badge">Featured</div>
+              <Image
+                src={item.image.trim()}
+                alt={item.name}
+                width={250}
+                height={250}
+                priority
+              />
+              <h3>{item.name}</h3>
+              <p>${item.price}</p>
+              <button className="add-to-cart">Add to Cart</button>
+            </div>
+          ))}
         </div>
       </section>
+
+      {selectedItem && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <span className="close-button" onClick={closeModal}>
+              &times;
+            </span>
+            <h2>{selectedItem.name}</h2>
+            <Image
+              src={selectedItem.image.trim()}
+              alt={selectedItem.name}
+              width={300}
+              height={300}
+              priority
+            />
+            <p>{`$${selectedItem.price}`}</p>
+            <p>{selectedItem.description}</p>
+            
+            <label>Select the amount</label>
+            <input
+              type="number"
+              value={amount}
+              min="1"
+              onChange={(e) => setAmount(Number(e.target.value))}
+            />
+
+            <label>Enter request</label>
+            <input
+              type="text"
+              value={request}
+              onChange={(e) => setRequest(e.target.value)}
+              placeholder="Enter request details"
+            />
+
+            <button className="buy-button" onClick={handleAddToCart}>
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Testimonials */}
       <section className="testimonials-section">
@@ -168,10 +248,22 @@ const Body = () => {
       <section className="newsletter-section">
         <h2>Join Our Sweet Newsletter</h2>
         <p>Get exclusive offers and dessert inspiration</p>
-        <form className="newsletter-form">
-          <input type="email" placeholder="Your email address" />
+        <form className="newsletter-form" onSubmit={handleSubscribe}>
+          <input 
+            type="email" 
+            placeholder="Your email address" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
           <button type="submit">Subscribe</button>
         </form>
+        {subscriptionStatus === "success" && (
+          <p className="subscription-message success">Thank you for subscribing!</p>
+        )}
+        {subscriptionStatus === "error" && (
+          <p className="subscription-message error">Something went wrong. Please try again.</p>
+        )}
       </section>
     </main>
   );
